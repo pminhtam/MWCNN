@@ -150,10 +150,13 @@ parser.add_argument('--testpath', type=str, default='../test/DIV2K_val_LR_our',
 parser.add_argument('--testset', type=str, default='Set5',
                     help='dataset name for testing')
 
+
 parser.add_argument('--noise_dir', '-n', default='/home/dell/Downloads/noise', help='path to noise folder image')
 parser.add_argument('--gt_dir', '-g', default='/home/dell/Downloads/gt', help='path to gt folder image')
 parser.add_argument('--image_size', '-sz', default=256, type=int, help='size of image')
 parser.add_argument('--epoch', '-e', default=1000, type=int, help='batch size')
+parser.add_argument('--save_every', '-se', default=200, type=int, help='save_every')
+parser.add_argument('--loss_every', '-le', default=10, type=int, help='loss_every')
 
 args = parser.parse_args()
 template.set_template(args)

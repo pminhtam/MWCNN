@@ -10,7 +10,6 @@ models
 .idea
 events*
 *pth*
-data/*
 *.PNG
 
 experiment

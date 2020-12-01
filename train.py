@@ -25,26 +25,29 @@ if __name__ == "__main__":
         data_set,
         batch_size=args.batch_size,
         shuffle=False,
-        num_workers=4
+        num_workers=args.n_threads
     )
 
     loss_func = loss.Loss(args, checkpoint)
     model = model.Model(args)
     optimizer = optim.Adam(
         model.parameters(),
-        lr=0.001
+        lr=args.lr
     )
     optimizer.zero_grad()
-
-    for epoch in range(10):
+    global_step = 0
+    for epoch in range(args.epochs):
         for step, (noise, gt) in enumerate(data_loader):
-            pred = model(noise,[10])
+            pred = model(noise,0)
             # print(pred.size())
             loss = loss_func(pred,gt)
-            # print("PSNR  : ",calculate_psnr(pred,gt))
-            # print(loss)
+            if global_step % args.save_every == 0:
+                torch.save(model.state_dict(), 'experiment/checkpoint{}.pth'.format(global_step))
+            if global_step % args.loss_every == 0:
+                print(global_step ,"PSNR  : ",calculate_psnr(pred,gt))
+                print(loss)
+            global_step +=1
 
-            torch.save(model.state_dict(),'experiment/checkpoint')
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
