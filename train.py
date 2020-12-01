@@ -40,6 +40,7 @@ if __name__ == "__main__":
     for epoch in range(args.epochs):
         for step, (noise, gt) in enumerate(data_loader):
             noise = noise.to(device)
+            gt = gt.to(device)
             pred = model(noise,0)
             # print(pred.size())
             loss = loss_func(pred,gt)
