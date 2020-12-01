@@ -29,7 +29,8 @@ if __name__ == "__main__":
     )
 
     loss_func = loss.Loss(args, checkpoint)
-    model = model.Model(args)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = model.Model(args).to(device)
     optimizer = optim.Adam(
         model.parameters(),
         lr=args.lr
@@ -38,6 +39,7 @@ if __name__ == "__main__":
     global_step = 0
     for epoch in range(args.epochs):
         for step, (noise, gt) in enumerate(data_loader):
+            noise = noise.to(device)
             pred = model(noise,0)
             # print(pred.size())
             loss = loss_func(pred,gt)
