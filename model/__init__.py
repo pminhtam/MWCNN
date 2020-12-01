@@ -15,7 +15,7 @@ class Model(nn.Module):
         self.self_ensemble = args.self_ensemble
         self.chop = args.chop
         self.precision = args.precision
-        self.device = torch.device('cpu' if args.cpu else 'cuda')
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.save_models = args.save_models
 
         module = import_module('model.' + args.model.lower())
