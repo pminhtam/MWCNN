@@ -11,7 +11,7 @@ parser.add_argument('--template', default='.',
 # Hardware specifications
 parser.add_argument('--n_threads', type=int, default=4,
                     help='number of threads for data loading')
-parser.add_argument('--cpu', action='store_true',default=True,
+parser.add_argument('--cpu', action='store_true',
                     help='use cpu only')
 parser.add_argument('--n_GPUs', type=int, default=1,
                     help='number of GPUs')
@@ -81,7 +81,7 @@ parser.add_argument('--reset', action='store_true',
                     help='reset the training')
 # parser.add_argument('--test_every', type=int, default=12,
 #                     help='do test per every N batches')
-parser.add_argument('--epochs', type=int, default=1000,
+parser.add_argument('--epochs','-e', type=int, default=1000,
                     help='number of epochs to train')
 parser.add_argument('--batch_size', type=int, default=1,
                     help='input batch size for training')
@@ -154,7 +154,6 @@ parser.add_argument('--testset', type=str, default='Set5',
 parser.add_argument('--noise_dir', '-n', default='/home/dell/Downloads/noise', help='path to noise folder image')
 parser.add_argument('--gt_dir', '-g', default='/home/dell/Downloads/gt', help='path to gt folder image')
 parser.add_argument('--image_size', '-sz', default=256, type=int, help='size of image')
-parser.add_argument('--epoch', '-e', default=1000, type=int, help='batch size')
 parser.add_argument('--save_every', '-se', default=200, type=int, help='save_every')
 parser.add_argument('--loss_every', '-le', default=10, type=int, help='loss_every')
 
