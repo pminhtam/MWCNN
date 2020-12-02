@@ -17,7 +17,7 @@ import numpy as np
 from torchsummary import summary
 from utils.metric import calculate_psnr
 from utils.training_util import save_checkpoint,MovingAverage, load_checkpoint
-from collections import OrderedDict
+# from collections import OrderedDict
 
 
 if __name__ == "__main__":
