@@ -1,7 +1,7 @@
 import torch
 import argparse
 import utility
-import model
+from model.mwcnn import Model
 from torch.utils.data import DataLoader
 import loss
 import os
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     checkpoint_dir = "checkpoint/"
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
-    model = model.Model(args).to(device)
+    model = Model(args).to(device)
     optimizer = optim.Adam(
         model.parameters(),
         lr=args.lr

@@ -1,33 +1,31 @@
 import torch
 import argparse
 import utility
-import model as MWCNN
+from model.mwcnn import Model
 from torch.utils.data import DataLoader
 # import h5py
 from option import args
 from data.data_provider import SingleLoader
-torch.set_num_threads(4)
-torch.manual_seed(args.seed)
-checkpoint = utility.checkpoint(args)
-# import model
 from torchsummary import summary
 from utils.metric import calculate_psnr,calculate_ssim
 import os
 import matplotlib.pyplot as plt
 import numpy as np
 import torchvision.transforms as transforms
-from collections import OrderedDict
-from utils.training_util import save_checkpoint,MovingAverage, load_checkpoint
+from utils.training_util import load_checkpoint
 import math
 from PIL import Image
 import glob
 import time
 # from torchsummary import summary
 
+torch.set_num_threads(4)
+torch.manual_seed(args.seed)
+checkpoint = utility.checkpoint(args)
 torch.manual_seed(0)
 
 def test(args):
-    model = MWCNN.Model(args)
+    model = Model(args)
     save_img = ''
     # summary(model,[[3,128,128],[0]])
     # exit()
@@ -73,6 +71,6 @@ def test(args):
 
 
 if __name__ == "__main__":
-    args.noise_dir = '/home/dell/Downloads/FullTest/noisy'
+    # args.noise_dir = '/home/dell/Downloads/FullTest/noisy'
     test(args)
 

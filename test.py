@@ -1,7 +1,7 @@
 import torch
 import argparse
 import utility
-import model
+from model.mwcnn import Model
 from torch.utils.data import DataLoader
 # import h5py
 from option import args
@@ -27,7 +27,7 @@ if __name__ == "__main__":
         shuffle=False,
         num_workers=4
     )
-    model = model.Model(args)
+    model = Model(args)
 
     state_dict = torch.load('experiment/checkpoint')
     new_state_dict = OrderedDict()
