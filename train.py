@@ -1,6 +1,6 @@
 import torch
 import argparse
-import utility
+# import utility
 from model.mwcnn import Model
 from torch.utils.data import DataLoader
 import loss
@@ -24,18 +24,18 @@ if __name__ == "__main__":
 
     torch.set_num_threads(4)
     torch.manual_seed(args.seed)
-    checkpoint = utility.checkpoint(args)
+    # checkpoint = utility.checkpoint(args)
     data_set = SingleLoader(noise_dir=args.noise_dir,gt_dir=args.gt_dir,image_size=args.image_size)
     data_loader = DataLoader(
         data_set,
         batch_size=args.batch_size,
         shuffle=False,
-        num_workers=args.n_threads
+        num_workers=args.num_workers
     )
 
-    loss_func = loss.Loss(args, checkpoint)
+    loss_func = loss.Loss(args,None)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    checkpoint_dir = "checkpoint/"
+    checkpoint_dir = args.checkpoint
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
     model = Model(args).to(device)
@@ -43,28 +43,36 @@ if __name__ == "__main__":
         model.parameters(),
         lr=args.lr
     )
+    scheduler = optim.lr_scheduler.MultiStepLR(optimizer, [2, 4, 6, 8, 10, 12, 14, 16], 0.8)
+
     optimizer.zero_grad()
     global_step = 0
     average_loss = MovingAverage(args.save_every)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    try:
-        checkpoint = load_checkpoint(checkpoint_dir, device == 'cuda', 'latest')
-        start_epoch = checkpoint['epoch']
-        global_step = checkpoint['global_iter']
-        best_loss = checkpoint['best_loss']
-        state_dict = checkpoint['state_dict']
-        # new_state_dict = OrderedDict()
-        # for k, v in state_dict.items():
-        #     name = "model."+ k  # remove `module.`
-        #     new_state_dict[name] = v
-        model.model.load_state_dict(state_dict)
-        optimizer.load_state_dict(checkpoint['optimizer'])
-        print('=> loaded checkpoint (epoch {}, global_step {})'.format(start_epoch, global_step))
-    except:
+    if args.restart:
         start_epoch = 0
         global_step = 0
         best_loss = np.inf
         print('=> no checkpoint file to be loaded.')
+    else:
+        try:
+            checkpoint = load_checkpoint(checkpoint_dir, device == 'cuda', 'latest')
+            start_epoch = checkpoint['epoch']
+            global_step = checkpoint['global_iter']
+            best_loss = checkpoint['best_loss']
+            state_dict = checkpoint['state_dict']
+            # new_state_dict = OrderedDict()
+            # for k, v in state_dict.items():
+            #     name = "model."+ k  # remove `module.`
+            #     new_state_dict[name] = v
+            model.model.load_state_dict(state_dict)
+            optimizer.load_state_dict(checkpoint['optimizer'])
+            print('=> loaded checkpoint (epoch {}, global_step {})'.format(start_epoch, global_step))
+        except:
+            start_epoch = 0
+            global_step = 0
+            best_loss = np.inf
+            print('=> no checkpoint file to be loaded.')
     for epoch in range(start_epoch, args.epochs):
         for step, (noise, gt) in enumerate(data_loader):
             noise = noise.to(device)
@@ -98,4 +106,4 @@ if __name__ == "__main__":
             global_step +=1
 
     # print(model)
-    print(summary(model,[(3,512,512),[8]]))
+    # print(summary(model,[(3,512,512),[8]]))

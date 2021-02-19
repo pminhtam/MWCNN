@@ -9,7 +9,7 @@ parser.add_argument('--template', default='.',
                     help='You can set various templates in option.py')
 
 # Hardware specifications
-parser.add_argument('--n_threads', type=int, default=4,
+parser.add_argument('--num_workers','-nw', type=int, default=4,
                     help='number of threads for data loading')
 parser.add_argument('--cpu', action='store_true',
                     help='use cpu only')
@@ -156,7 +156,10 @@ parser.add_argument('--gt_dir', '-g', default='/home/dell/Downloads/gt', help='p
 parser.add_argument('--image_size', '-sz', default=256, type=int, help='size of image')
 parser.add_argument('--save_every', '-se', default=200, type=int, help='save_every')
 parser.add_argument('--loss_every', '-le', default=10, type=int, help='loss_every')
-
+parser.add_argument('--checkpoint', '-ckpt', type=str, default='checkpoints',
+                        help='the checkpoint to eval')
+parser.add_argument('--restart', '-r', action='store_true',
+                    help='Whether to remove all old files and restart the training process')
 args = parser.parse_args()
 template.set_template(args)
 

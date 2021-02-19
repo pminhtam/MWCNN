@@ -49,5 +49,5 @@ if __name__ == "__main__":
             plt.imshow(np.array(trans(gt[0])))
             plt.show()
             print("PSNR  : ",calculate_psnr(pred,gt))    # print(model)
-    print(summary(model,[(3,512,512),[8]]))
+    # print(summary(model,[(3,512,512),[8]]))
 

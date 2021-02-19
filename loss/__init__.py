@@ -60,7 +60,7 @@ class Loss(nn.modules.loss._Loss):
         self.loss_module.to(device)
         if args.precision == 'half': self.loss_module.half()
 
-        if args.load != '.': self.load(ckp.dir, cpu=args.cpu)
+        # if args.load != '.': self.load(ckp.dir, cpu=args.cpu)
 
     def forward(self, sr, hr):
         losses = []
