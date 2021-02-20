@@ -28,10 +28,14 @@ def merge_image(save_dir, folder_dir):
 
   cv2.imwrite(os.path.join(save_dir, '{}.png'.format(image_name)), image[...,::-1])
 
-save_dir = ''
+save_dir = '/root/codalab_re_img'
+if not os.path.exists(save_dir):
+  os.makedirs(save_dir)
 # merge_image(save_dir, '/content/drive/MyDrive/CycleISP/CycleISP/MAI/255 (1)')
-for folder_dir in natsorted(glob.glob('/content/drive/MyDrive/CycleISP/CycleISP/MAI/*'))[:1]:
+for folder_dir in natsorted(glob.glob('/root/codalab_re/*')):
+  print(folder_dir)
   merge_image(save_dir, folder_dir)
+
 
 
 

@@ -1,14 +1,14 @@
 import torch
 import argparse
 # import utility
-from model.mwcnn import Model
+from model.mwcnn_dgf import MWCNN_DGF
 from torch.utils.data import DataLoader
 import loss
 import os
 
 # import h5py
 from option import args
-from data.data_provider import SingleLoader
+from data.data_provider import SingleLoader_DGF
 import torch.optim as optim
 from torch.optim import lr_scheduler
 import torch.nn as nn
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     torch.set_num_threads(4)
     torch.manual_seed(args.seed)
     # checkpoint = utility.checkpoint(args)
-    data_set = SingleLoader(noise_dir=args.noise_dir,gt_dir=args.gt_dir,image_size=args.image_size)
+    data_set = SingleLoader_DGF(noise_dir=args.noise_dir,gt_dir=args.gt_dir,image_size=args.image_size,burst_length=args.burst_length)
     data_loader = DataLoader(
         data_set,
         batch_size=args.batch_size,
@@ -34,11 +34,12 @@ if __name__ == "__main__":
     )
 
     loss_func = loss.Loss(args,None)
+    loss_func_i = loss.LossAnneal_i()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     checkpoint_dir = args.checkpoint
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
-    model = Model(args).to(device)
+    model = MWCNN_DGF(args).to(device)
     optimizer = optim.Adam(
         model.parameters(),
         lr=args.lr
@@ -65,7 +66,7 @@ if __name__ == "__main__":
             # for k, v in state_dict.items():
             #     name = "model."+ k  # remove `module.`
             #     new_state_dict[name] = v
-            model.model.load_state_dict(state_dict)
+            model.load_state_dict(state_dict)
             optimizer.load_state_dict(checkpoint['optimizer'])
             print('=> loaded checkpoint (epoch {}, global_step {})'.format(start_epoch, global_step))
         except:
@@ -74,12 +75,16 @@ if __name__ == "__main__":
             best_loss = np.inf
             print('=> no checkpoint file to be loaded.')
     for epoch in range(start_epoch, args.epochs):
-        for step, (noise, gt) in enumerate(data_loader):
-            noise = noise.to(device)
-            gt = gt.to(device)
-            pred = model(noise,0)
+        for step, (image_noise_hr,image_noise_lr, image_gt_hr, image_gt_lr) in enumerate(data_loader):
+            burst_noise = image_noise_lr.to(device)
+            gt = image_gt_hr.to(device)
+            image_gt_lr = image_gt_lr.to(device)
+            image_noise_hr = image_noise_hr.to(device)
+            pred_i, pred = model(burst_noise,image_noise_hr)
             # print(pred.size())
-            loss = loss_func(pred,gt)
+            loss_basic = loss_func(pred, gt)
+            loss_i = loss_func_i(global_step, pred_i, image_gt_lr)
+            loss = loss_basic + loss_i
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -95,13 +100,16 @@ if __name__ == "__main__":
                 save_dict = {
                     'epoch': epoch,
                     'global_iter': global_step,
-                    'state_dict': model.model.state_dict(),
+                    'state_dict': model.state_dict(),
                     'best_loss': best_loss,
                     'optimizer': optimizer.state_dict(),
                 }
                 save_checkpoint(save_dict, is_best, checkpoint_dir, global_step)
             if global_step % args.loss_every == 0:
-                print(global_step ,"PSNR  : ",calculate_psnr(pred,gt))
+                print('{:-4d}\t| epoch {:2d}\t| step {:4d}\t| loss_basic: {:.4f}\t|'
+                      ' loss: {:.4f}\t| PSNR: {:.2f}dB\t.'
+                      .format(global_step, epoch, step, loss_basic, loss, calculate_psnr(pred, gt)))
+                # print(global_step ,"PSNR  : ",calculate_psnr(pred,gt))
                 print(average_loss.get_value())
             global_step +=1
         scheduler.step()
