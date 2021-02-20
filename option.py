@@ -160,6 +160,8 @@ parser.add_argument('--checkpoint', '-ckpt', type=str, default='checkpoints',
                         help='the checkpoint to eval')
 parser.add_argument('--restart', '-r', action='store_true',
                     help='Whether to remove all old files and restart the training process')
+parser.add_argument('--save_img', "-s", default="", type=str, help='save image in eval_img folder ')
+
 args = parser.parse_args()
 template.set_template(args)
 
