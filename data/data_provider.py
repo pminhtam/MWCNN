@@ -59,7 +59,21 @@ def pixel_unshuffle(input, upscale_factor):
     # channels *= upscale_factor ** 2
     unshuffle_out = input_view.permute(2, 4,0, 1, 3).contiguous()
     return unshuffle_out.view(upscale_factor ** 2, channels, out_height, out_width)
+def pixel_shuffle(input, upscale_factor):
 
+    # print(input.size())
+    batch_size, num_img, channels, in_height, in_width = input.size()
+    if num_img != upscale_factor**2:
+        print("pixel_shuffle Fail ")
+        return
+    out_height = in_height * upscale_factor
+    out_width = in_width * upscale_factor
+
+    input_view = input.contiguous().view(batch_size, upscale_factor,upscale_factor,channels, in_height, in_width)
+
+    # channels *= upscale_factor ** 2
+    unshuffle_out = input_view.permute(0,3,4,1,5,2).contiguous()
+    return unshuffle_out.view(batch_size, channels, out_height, out_width)
 class SingleLoader(data.Dataset):
     """
     Args:

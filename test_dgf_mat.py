@@ -11,13 +11,21 @@ import scipy.io
 from option import args
 from model.mwcnn_dgf import MWCNN_DGF
 from collections import OrderedDict
-
+from data.data_provider import pixel_unshuffle,pixel_shuffle
+import math
 # from torchsummary import summary
 
-torch.set_num_threads(4)
 torch.manual_seed(0)
-torch.manual_seed(0)
-
+def load_data(image_noise,burst_length):
+    image_noise_hr = image_noise
+    upscale_factor = int(math.sqrt(burst_length))
+    image_noise = pixel_unshuffle(image_noise, upscale_factor)
+    while len(image_noise) < burst_length:
+        image_noise = torch.cat((image_noise,image_noise[-2:-1]),dim=0)
+    if len(image_noise) > burst_length:
+        image_noise = image_noise[0:8]
+    image_noise_burst_crop = image_noise.unsqueeze(0)
+    return image_noise_burst_crop,image_noise_hr.unsqueeze(0)
 def test(args):
     model = MWCNN_DGF(args)
 
@@ -29,11 +37,11 @@ def test(args):
     start_epoch = checkpoint['epoch']
     global_step = checkpoint['global_iter']
     state_dict = checkpoint['state_dict']
-    new_state_dict = OrderedDict()
-    for k, v in state_dict.items():
-        name = "model." + k[6:]  # remove `module.`
-        new_state_dict[name] = v
-    model.load_state_dict(new_state_dict)
+    # new_state_dict = OrderedDict()
+    # for k, v in state_dict.items():
+    #     name = "model." + k[6:]  # remove `module.`
+    #     new_state_dict[name] = v
+    model.load_state_dict(state_dict)
     print('=> loaded checkpoint (epoch {}, global_step {})'.format(start_epoch, global_step))
     # except:
     #     print('=> no checkpoint file to be loaded.')    # model.load_state_dict(state_dict)
@@ -54,9 +62,11 @@ def test(args):
     for i_img in range(i_imgs):
         for i_block in range(i_blocks):
             noise = transforms.ToTensor()(Image.fromarray(all_noisy_imgs[i_img][i_block])).unsqueeze(0)
-            noise = noise.to(device)
+            image_noise, image_noise_hr = load_data(noise, args.burst_length)
+            image_noise_hr = image_noise_hr.to(device)
+            burst_noise = image_noise.to(device)
             begin = time.time()
-            pred = model(noise,0)
+            _, pred = model(burst_noise, image_noise_hr)
             pred = pred.detach().cpu()
             gt = transforms.ToTensor()((Image.fromarray(all_clean_imgs[i_img][i_block])))
             gt = gt.unsqueeze(0)
