@@ -11,7 +11,7 @@ import scipy.io
 from option import args
 from model.mwcnn_dgf import MWCNN_DGF
 from collections import OrderedDict
-from data.data_provider import pixel_unshuffle,pixel_shuffle
+from data.data_provider import pixel_unshuffle
 import math
 # from torchsummary import summary
 
@@ -61,7 +61,7 @@ def test(args):
     # print(noisy_path)
     for i_img in range(i_imgs):
         for i_block in range(i_blocks):
-            noise = transforms.ToTensor()(Image.fromarray(all_noisy_imgs[i_img][i_block])).unsqueeze(0)
+            noise = transforms.ToTensor()(Image.fromarray(all_noisy_imgs[i_img][i_block]))
             image_noise, image_noise_hr = load_data(noise, args.burst_length)
             image_noise_hr = image_noise_hr.to(device)
             burst_noise = image_noise.to(device)
