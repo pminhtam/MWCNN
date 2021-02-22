@@ -157,6 +157,7 @@ parser.add_argument('--image_size', '-sz', default=256, type=int, help='size of 
 parser.add_argument('--save_every', '-se', default=200, type=int, help='save_every')
 parser.add_argument('--loss_every', '-le', default=10, type=int, help='loss_every')
 parser.add_argument('--burst_length', '-b', default=4, type=int, help='batch size')
+parser.add_argument('--model_type', '-m', default="noise", help='type of model : MWCNN, noise,DGF')
 parser.add_argument('--checkpoint', '-ckpt', type=str, default='checkpoints',
                         help='the checkpoint to eval')
 parser.add_argument('--restart', '-r', action='store_true',

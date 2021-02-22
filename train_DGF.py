@@ -18,6 +18,7 @@ from torchsummary import summary
 from utils.metric import calculate_psnr
 from utils.training_util import save_checkpoint,MovingAverage, load_checkpoint
 # from collections import OrderedDict
+from model.mwcnn_noise_estimate import MWCNN_noise
 
 
 if __name__ == "__main__":
@@ -39,7 +40,14 @@ if __name__ == "__main__":
     checkpoint_dir = args.checkpoint
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
-    model = MWCNN_DGF(args).to(device)
+    # model = MWCNN_DGF(args).to(device)
+    if args.model_type == "DGF":
+        model = MWCNN_DGF().to(device)
+    elif args.model_type == "noise":
+        model = MWCNN_noise().to(device)
+    else:
+        print(" Model type not valid")
+        exit()
     optimizer = optim.Adam(
         model.parameters(),
         lr=args.lr

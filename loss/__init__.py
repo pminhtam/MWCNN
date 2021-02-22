@@ -199,3 +199,16 @@ class LossAnneal_i(nn.Module):
             loss += self.loss_func(pred_i[:, i, ...], ground_truth[:,i,...])
         loss /= pred_i.size(1)
         return self.beta * self.alpha ** global_step * loss
+
+class CharbonnierLoss(nn.Module):
+    """Charbonnier Loss (L1)"""
+
+    def __init__(self, eps=1e-3):
+        super(CharbonnierLoss, self).__init__()
+        self.eps = eps
+
+    def forward(self, x, y):
+        diff = x - y
+        # loss = torch.sum(torch.sqrt(diff * diff + self.eps))
+        loss = torch.mean(torch.sqrt((diff * diff) + (self.eps*self.eps)))
+        return loss

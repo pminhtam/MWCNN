@@ -5,17 +5,17 @@ import scipy.io as sio
 import os
 from importlib import import_module
 
-def make_model(args, parent=False):
-    return MWCNN(args)
+def make_model(n_resblocks=20,n_feats=64 ,n_colors=3):
+    return MWCNN(n_resblocks=n_resblocks,n_feats=n_feats ,n_colors=n_colors)
 
 class MWCNN(nn.Module):
-    def __init__(self, args, conv=common.default_conv):
+    def __init__(self, n_resblocks=20,n_feats=64 ,n_colors=3  , conv=common.default_conv):
         super(MWCNN, self).__init__()
-        n_resblocks = args.n_resblocks
-        n_feats = args.n_feats
+        n_resblocks = n_resblocks
+        n_feats = n_feats
         kernel_size = 3
         self.scale_idx = 0
-        nColor = args.n_colors
+        nColor = n_colors
 
         act = nn.ReLU(True)
 
@@ -88,7 +88,7 @@ class Model(nn.Module):
         self.save_models = args.save_models
 
         module = import_module('model.' + args.model.lower())
-        self.model = module.make_model(args).to(self.device)
+        self.model = module.make_model().to(self.device)
         if args.precision == 'half': self.model.half()
 
 

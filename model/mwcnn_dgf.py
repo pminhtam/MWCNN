@@ -3,9 +3,9 @@ import torch.nn as nn
 
 from guided_filter_pytorch.guided_filter import ConvGuidedFilter2
 class MWCNN_DGF(nn.Module):
-    def __init__(self,args):
+    def __init__(self,n_resblocks=20,n_feats=64 ,n_colors=3):
         super(MWCNN_DGF, self).__init__()
-        self.mwcnn = MWCNN(args)
+        self.mwcnn = MWCNN(n_resblocks=n_resblocks,n_feats=n_feats ,n_colors=n_colors)
         self.gf = ConvGuidedFilter2(radius=1)
 
     def forward(self, data,x_hr):
