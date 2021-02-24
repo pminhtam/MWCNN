@@ -49,9 +49,9 @@ if __name__ == "__main__":
         os.makedirs(checkpoint_dir)
     # model = MWCNN_DGF(args).to(device)
     if args.model_type == "DGF":
-        model = MWCNN_DGF().to(device)
+        model = MWCNN_DGF(n_colors= args.n_colors).to(device)
     elif args.model_type == "noise":
-        model = MWCNN_noise().to(device)
+        model = MWCNN_noise(n_colors=args.n_colors).to(device)
     else:
         print(" Model type not valid")
         exit()
