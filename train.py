@@ -8,7 +8,7 @@ import os
 
 # import h5py
 from option import args
-from data.data_provider import SingleLoader
+from data.data_provider import SingleLoader,SingleLoader_raw
 import torch.optim as optim
 from torch.optim import lr_scheduler
 import torch.nn as nn
@@ -25,7 +25,13 @@ if __name__ == "__main__":
     torch.set_num_threads(4)
     torch.manual_seed(args.seed)
     # checkpoint = utility.checkpoint(args)
-    data_set = SingleLoader(noise_dir=args.noise_dir,gt_dir=args.gt_dir,image_size=args.image_size)
+    if args.data_type =='rgb':
+        data_set = SingleLoader(noise_dir=args.noise_dir,gt_dir=args.gt_dir,image_size=args.image_size)
+    elif args.data_type == 'raw':
+        data_set = SingleLoader_raw(noise_dir=args.noise_dir,gt_dir=args.gt_dir,image_size=args.image_size)
+    else:
+        print("Data type not valid")
+        exit()
     data_loader = DataLoader(
         data_set,
         batch_size=args.batch_size,
