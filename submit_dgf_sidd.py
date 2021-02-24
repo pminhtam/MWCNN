@@ -33,11 +33,11 @@ def test(args):
     start_epoch = checkpoint['epoch']
     global_step = checkpoint['global_iter']
     state_dict = checkpoint['state_dict']
-    new_state_dict = OrderedDict()
-    for k, v in state_dict.items():
-        name = "model." + k  # remove `module.`
-        new_state_dict[name] = v
-    model.load_state_dict(new_state_dict)
+    # new_state_dict = OrderedDict()
+    # for k, v in state_dict.items():
+    #     name = "model." + k  # remove `module.`
+    #     new_state_dict[name] = v
+    model.load_state_dict(state_dict)
     print('=> loaded checkpoint (epoch {}, global_step {})'.format(start_epoch, global_step))
     # except:
     #     print('=> no checkpoint file to be loaded.')    # model.load_state_dict(state_dict)
