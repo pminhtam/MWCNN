@@ -6,13 +6,24 @@ from PIL import Image
 import time
 import scipy.io
 from option import args
-from model.mwcnn import Model
+from model.mwcnn_dgf import MWCNN_DGF
 from collections import OrderedDict
-
+from data.data_provider import pixel_unshuffle
+import math
 # from torchsummary import summary
 
+def load_data(image_noise,burst_length):
+    image_noise_hr = image_noise
+    upscale_factor = int(math.sqrt(burst_length))
+    image_noise = pixel_unshuffle(image_noise, upscale_factor)
+    while len(image_noise) < burst_length:
+        image_noise = torch.cat((image_noise,image_noise[-2:-1]),dim=0)
+    if len(image_noise) > burst_length:
+        image_noise = image_noise[0:8]
+    image_noise_burst_crop = image_noise.unsqueeze(0)
+    return image_noise_burst_crop,image_noise_hr.unsqueeze(0)
 def test(args):
-    model = Model(args)
+    model = MWCNN_DGF(args)
 
     checkpoint_dir = args.checkpoint
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -42,10 +53,12 @@ def test(args):
 
     for i_img in range(i_imgs):
         for i_block in range(i_blocks):
-            noise = transforms.ToTensor()(Image.fromarray(all_noisy_imgs[i_img][i_block])).unsqueeze(0)
-            noise = noise.to(device)
+            noise = transforms.ToTensor()(Image.fromarray(all_noisy_imgs[i_img][i_block]))
+            image_noise, image_noise_hr = load_data(noise, args.burst_length)
+            image_noise_hr = image_noise_hr.to(device)
+            burst_noise = image_noise.to(device)
             begin = time.time()
-            pred = model(noise,0)
+            _, pred = model(burst_noise, image_noise_hr)
             pred = pred.detach().cpu()
 
             mat_re[i_img][i_block] = np.array(trans(pred[0]))
