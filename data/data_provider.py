@@ -16,7 +16,7 @@ IMG_EXTENSIONS = [
     '.png', '.PNG', '.ppm', '.PPM', '.bmp', '.BMP',
 ]
 IMG_EXTENSIONS_RAW = [
-    '.RAW', '.raw'
+    '.RAW', '.raw','.MAT','.mat'
 ]
 augment   = Augment_RGB_torch()
 transforms_aug = [method for method in dir(augment) if callable(getattr(augment, method)) if not method.startswith('_')]
