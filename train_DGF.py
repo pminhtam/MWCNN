@@ -34,7 +34,8 @@ if __name__ == "__main__":
         num_workers=args.num_workers
     )
 
-    loss_func = loss.Loss(args,None)
+    # loss_func = loss.Loss(args,None)
+    loss_func = loss.CharbonnierLoss()
     loss_func_i = loss.LossAnneal_i()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     checkpoint_dir = args.checkpoint
