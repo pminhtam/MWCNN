@@ -6,7 +6,7 @@ class MWCNN_DGF(nn.Module):
     def __init__(self,n_resblocks=20,n_feats=64 ,n_colors=3):
         super(MWCNN_DGF, self).__init__()
         self.mwcnn = MWCNN(n_resblocks=n_resblocks,n_feats=n_feats ,n_colors=n_colors)
-        self.gf = ConvGuidedFilter2(radius=1)
+        self.gf = ConvGuidedFilter2(radius=1,n_colors=n_colors,n_bursts=4)
 
     def forward(self, data,x_hr):
         b, N, c, h, w = data.size()
