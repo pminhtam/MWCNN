@@ -266,6 +266,38 @@ class DBlock_com1(nn.Module):
         x = self.body(x)
         return x
 
+class ChannelPool(nn.Module):
+    def forward(self, x):
+        return torch.cat( (torch.max(x,1)[0].unsqueeze(1), torch.mean(x,1).unsqueeze(1)), dim=1 )
+
+class spatial_attn_layer(nn.Module):
+    def __init__(self, kernel_size=3):
+        super(spatial_attn_layer, self).__init__()
+        self.compress = ChannelPool()
+        self.spatial = nn.Conv2d(2, 1, kernel_size, stride=1, padding=(kernel_size-1) // 2)
+    def forward(self, x):
+        # import pdb;pdb.set_trace()
+        x_compress = self.compress(x)
+        x_out = self.spatial(x_compress)
+        scale = torch.sigmoid(x_out) # broadcasting
+        return x * scale
+class CALayer(nn.Module):
+    def __init__(self, channel, reduction=16):
+        super(CALayer, self).__init__()
+        # global average pooling: feature --> point
+        self.avg_pool = nn.AdaptiveAvgPool2d(1)
+        # feature channel downscale and upscale --> channel weight
+        self.conv_du = nn.Sequential(
+                nn.Conv2d(channel, channel // reduction, 1, padding=0, bias=True),
+                nn.ReLU(inplace=True),
+                nn.Conv2d(channel // reduction, channel, 1, padding=0, bias=True),
+                nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        y = self.avg_pool(x)
+        y = self.conv_du(y)
+        return x * y
 class DBlock_inv1(nn.Module):
     def __init__(
         self, conv, in_channels, out_channels, kernel_size,
@@ -281,12 +313,20 @@ class DBlock_inv1(nn.Module):
         if bn: m.append(nn.BatchNorm2d(out_channels, eps=1e-4, momentum=0.95))
         m.append(act)
 
+        self.SA = spatial_attn_layer()            ## Spatial Attention
+        self.CA = CALayer(out_channels, reduction=16)     ## Channel Attention
+        self.conv1x1 = nn.Conv2d(out_channels*2, out_channels, kernel_size=1)
 
         self.body = nn.Sequential(*m)
         self.res_scale = res_scale
 
     def forward(self, x):
-        x = self.body(x)
+        res = self.body(x)
+        sa_branch = self.SA(x)
+        ca_branch = self.CA(x)
+        res = torch.cat([sa_branch, ca_branch], dim=1)
+        res = self.conv1x1(res)
+        res += x
         return x
 
 class DBlock_com2(nn.Module):
