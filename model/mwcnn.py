@@ -88,7 +88,7 @@ class Model(nn.Module):
         self.save_models = args.save_models
 
         module = import_module('model.' + args.model.lower())
-        self.model = module.make_model().to(self.device)
+        self.model = module.make_model(n_colors=args.n_colors).to(self.device)
         if args.precision == 'half': self.model.half()
 
 

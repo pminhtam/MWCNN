@@ -15,7 +15,7 @@ def default_conv(in_channels, out_channels, kernel_size, bias=True, dilation=1):
 def default_conv1(in_channels, out_channels, kernel_size, bias=True, groups=3):
     return nn.Conv2d(
         in_channels,out_channels, kernel_size,
-        padding=(kernel_size//2), bias=bias, groups=groups)
+        padding=(kernel_size//2), bias=bias, groups=in_channels)
 
 #def shuffle_channel()
 
