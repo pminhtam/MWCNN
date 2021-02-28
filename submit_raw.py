@@ -40,7 +40,7 @@ def test(args):
             noise = transforms.ToTensor()(pack_raw(all_noisy_imgs[i_img][i_block])).unsqueeze(0)
             noise = noise.to(device)
             begin = time.time()
-            pred = model(noise)
+            pred = model(noise,0)
             pred = np.array(pred.detach().cpu()[0]).transpose(1,2,0)
             pred = unpack_raw(pred)
             mat_re[i_img][i_block] = np.array(pred)
