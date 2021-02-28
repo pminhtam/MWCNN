@@ -20,7 +20,28 @@ def pack_raw(raw_im):
     gc.collect()
 
     return out
+def unpack_raw(raw_pack):
+    """Un Packs Bayer image to 4 channels (h, w) <-- (h/2, w/2, 4)."""
+    # pack Bayer image to 4 channels
+    img_shape = raw_pack.shape
+    # print(raw_pack.shape)
+    # print('img_shape: ' + str(img_shape))
+    h = img_shape[0]
+    w = img_shape[1]
+    # print(h,w)
+    out = np.zeros((h*2,w*2))
+    # print("out.shape  : ",out.shape)
+    # print("out[0:h:2, 0:w:2].shape  : ",out[0:h*2:2, 0:w*2:2].shape)
+    # print("raw_pack.shape  : ",raw_pack.shape)
+    # print(raw_pack[:, :,0].shape)
+    out[0:h*2:2, 0:w*2:2] = raw_pack[:, :,0]
+    out[0:h*2:2, 1:w*2:2] = raw_pack[:, :,1]
+    out[1:h*2:2, 1:w*2:2] = raw_pack[:, :,2]
+    out[1:h*2:2, 0:w*2:2] = raw_pack[:, :,3]
 
+    gc.collect()
+
+    return out
 
 def read_raw(img_path):
     with h5py.File(img_path, 'r') as f:  # (use this for .mat files with -v7.3 format)
