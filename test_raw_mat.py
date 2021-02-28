@@ -42,7 +42,7 @@ def test(args):
     all_clean_imgs = scipy.io.loadmat(args.gt_dir)['ValidationGtBlocksRaw']
     # noisy_path = sorted(glob.glob(args.noise_dir+ "/*.png"))
     # clean_path = [ i.replace("noisy","clean") for i in noisy_path]
-    i_imgs,i_blocks, _,_,_ = all_noisy_imgs.shape
+    i_imgs,i_blocks, _,_ = all_noisy_imgs.shape
     psnrs = []
     ssims = []
     # print(noisy_path)
