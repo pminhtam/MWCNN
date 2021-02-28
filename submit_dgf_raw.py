@@ -56,7 +56,7 @@ def test(args):
             burst_noise = image_noise.to(device)
             begin = time.time()
             _, pred = model(burst_noise,image_noise_hr)
-            pred = np.array(trans(pred.detach().cpu()[0]))
+            pred = np.array(pred.detach().cpu()[0]).transpose(1,2,0)
             pred = unpack_raw(pred)
             mat_re[i_img][i_block] = np.array(pred)
 

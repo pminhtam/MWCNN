@@ -10,6 +10,7 @@ import time
 import scipy.io
 from utils.raw_util import pack_raw,unpack_raw
 from option import args
+from collections import OrderedDict
 
 def test(args):
     model = Model(args)
@@ -20,7 +21,11 @@ def test(args):
     start_epoch = checkpoint['epoch']
     global_step = checkpoint['global_iter']
     state_dict = checkpoint['state_dict']
-    model.load_state_dict(state_dict)
+    new_state_dict = OrderedDict()
+    for k, v in state_dict.items():
+        name = "model." + k  # remove `module.`
+        new_state_dict[name] = v
+    model.load_state_dict(new_state_dict)
     print('=> loaded checkpoint (epoch {}, global_step {})'.format(start_epoch, global_step))
     model.eval()
     model = model.to(device)
@@ -36,9 +41,9 @@ def test(args):
             noise = noise.to(device)
             begin = time.time()
             pred = model(noise)
-            pred = pred.detach().cpu()[0]
+            pred = np.array(pred.detach().cpu()[0]).transpose(1,2,0)
             pred = unpack_raw(pred)
-            mat_re[i_img][i_block] = np.array(trans(pred))
+            mat_re[i_img][i_block] = np.array(pred)
 
     return mat_re
 
