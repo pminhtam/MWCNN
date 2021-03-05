@@ -16,7 +16,7 @@ import math
 # from torchsummary import summary
 
 torch.manual_seed(0)
-def load_data(image_noise,burst_length):
+def load_data_split(image_noise,burst_length):
     image_noise_hr = image_noise
     upscale_factor = int(math.sqrt(burst_length))
     image_noise = pixel_unshuffle(image_noise, upscale_factor)
@@ -26,9 +26,18 @@ def load_data(image_noise,burst_length):
         image_noise = image_noise[0:8]
     image_noise_burst_crop = image_noise.unsqueeze(0)
     return image_noise_burst_crop,image_noise_hr.unsqueeze(0)
+from data.dataset_utils import burst_image_filter
+def load_data_filter(image_noise, burst_length):
+    image_noise_hr = image_noise
+    image_noise = burst_image_filter(image_noise_hr)
+    image_noise_burst_crop = image_noise.unsqueeze(0)
+    return image_noise_burst_crop, image_noise_hr.unsqueeze(0)
 def test(args):
     model = MWCNN_DGF(args)
-
+    if args.data_type == 'rgb':
+        load_data = load_data_split
+    elif args.data_type == 'filter':
+        load_data = load_data_filter
     checkpoint_dir = args.checkpoint
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # try:
