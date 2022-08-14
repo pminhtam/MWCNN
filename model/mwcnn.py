@@ -94,11 +94,11 @@ class Model(nn.Module):
 
         if args.print_model: print(self.model)
 
-    def forward(self, x, idx_scale):
-        self.idx_scale = idx_scale
+    def forward(self, x):
+        self.idx_scale = 0
         target = self.get_model()
         if hasattr(target, 'set_scale'):
-            target.set_scale(idx_scale)
+            target.set_scale(0)
 
         if self.self_ensemble and not self.training:
             if self.chop:

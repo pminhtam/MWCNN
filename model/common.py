@@ -83,7 +83,7 @@ def iwt_init(x):
     in_batch, in_channel, in_height, in_width = x.size()
     #print([in_batch, in_channel, in_height, in_width])
     out_batch, out_channel, out_height, out_width = in_batch, int(
-        in_channel / (r ** 2)), r * in_height, r * in_width
+        in_channel // (r ** 2)), r * in_height, r * in_width
     x1 = x[:, 0:out_channel, :, :] / 2
     x2 = x[:, out_channel:out_channel * 2, :, :] / 2
     x3 = x[:, out_channel * 2:out_channel * 3, :, :] / 2
@@ -124,22 +124,63 @@ class Pixel_Down_Shuffle(nn.Module):
     def forward(self, x):
         return pixel_down_shuffle(x, 2)
 
+# class DWT(nn.Module):
+#     def __init__(self):
+#         super(DWT, self).__init__()
+#         self.requires_grad = False
+#
+#     def forward(self, x):
+#         return dwt_init(x)
+#
+# class IWT(nn.Module):
+#     def __init__(self):
+#         super(IWT, self).__init__()
+#         self.requires_grad = False
+#
+#     def forward(self, x):
+#         return iwt_init(x)
+import numpy as np
+import torch.nn.functional as F
+
 class DWT(nn.Module):
     def __init__(self):
         super(DWT, self).__init__()
-        self.requires_grad = False
-
+        ll = np.array([[0.5, 0.5], [0.5, 0.5]])
+        lh = np.array([[-0.5, -0.5], [0.5, 0.5]])
+        hl = np.array([[-0.5, 0.5], [-0.5, 0.5]])
+        hh = np.array([[0.5, -0.5], [-0.5, 0.5]])
+        filts = np.stack([ll[None,::-1,::-1], lh[None,::-1,::-1],
+                            hl[None,::-1,::-1], hh[None,::-1,::-1]],
+                            axis=0)
+        self.weight = nn.Parameter(
+            torch.tensor(filts).to(torch.get_default_dtype()),
+            requires_grad=False)
     def forward(self, x):
-        return dwt_init(x)
+        C = x.shape[1]
+        filters = torch.cat([self.weight,] * C, dim=0)
+        y = F.conv2d(x, filters, groups=C, stride=2)
+        return y
+
 
 class IWT(nn.Module):
     def __init__(self):
         super(IWT, self).__init__()
-        self.requires_grad = False
+        ll = np.array([[0.5, 0.5], [0.5, 0.5]])
+        lh = np.array([[-0.5, -0.5], [0.5, 0.5]])
+        hl = np.array([[-0.5, 0.5], [-0.5, 0.5]])
+        hh = np.array([[0.5, -0.5], [-0.5, 0.5]])
+        filts = np.stack([ll[None, ::-1, ::-1], lh[None, ::-1, ::-1],
+                            hl[None, ::-1, ::-1], hh[None, ::-1, ::-1]],
+                            axis=0)
+        self.weight = nn.Parameter(
+            torch.tensor(filts).to(torch.get_default_dtype()),
+            requires_grad=False)
 
     def forward(self, x):
-        return iwt_init(x)
-
+        C = torch.floor_divide(x.shape[1], 4)
+        filters = torch.cat([self.weight, ] * C, dim=0)
+        y = F.conv_transpose2d(x, filters, groups=C, stride=2)
+        return y
 
 class MeanShift(nn.Conv2d):
     def __init__(self, rgb_range, rgb_mean, rgb_std, sign=-1):
